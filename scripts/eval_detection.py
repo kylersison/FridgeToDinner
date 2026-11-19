@@ -1,13 +1,17 @@
-"""Score ingredient detection against hand-labeled ground truth (Phase 3 evaluation).
+"""Score ingredient detection against hand-labeled ground truth.
 
 Ground truth file format (eval/ground_truth.json):
-    [{"photo": "data/photos/fridge_001.jpg", "cuisine": "mixed",
+    [{"photo": "data/photos/fridge_001.jpg", "cuisine": "mixed", "source": "stock",
       "items": ["eggs", "milk", "cheddar cheese"]}, ...]
 
-    python scripts/eval_detection.py --truth eval/ground_truth.json
+    python scripts/eval_detection.py --truth eval/ground_truth.json [--save eval/raw_predictions.json]
 
-Prints micro precision / recall / F1 overall and per cuisine tag.
-Matching uses the same name normalization as the validator.
+Two scores are reported:
+  strict  - names must match exactly after normalization ("eggs" == "egg")
+  lenient - one name's words are contained in the other's ("cheese" ~ "cheddar cheese"),
+            the same rule the app's validator uses; each truth item matches at most once
+Per photo it prints the missed items (false negatives) and the extra items the model
+reported that are not in the labels (false positives) so they can be reviewed by hand.
 """
 
 import argparse
@@ -32,29 +36,64 @@ def prf(tp: int, fp: int, fn: int) -> tuple[float, float, float]:
     return p, r, f
 
 
+def _lenient_eq(a: str, b: str) -> bool:
+    ta, tb = set(a.split()), set(b.split())
+    return a == b or (ta and tb and (ta <= tb or tb <= ta))
+
+
+def match(pred: list[str], truth: list[str], lenient: bool) -> tuple[int, list[str], list[str]]:
+    """One-to-one greedy matching. Returns (tp, unmatched_pred, unmatched_truth)."""
+    remaining = list(truth)
+    extra = []
+    tp = 0
+    for p in pred:
+        hit = next((t for t in remaining if (p == t if not lenient else _lenient_eq(p, t))), None)
+        if hit is None:
+            extra.append(p)
+        else:
+            remaining.remove(hit)
+            tp += 1
+    return tp, extra, remaining
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--truth", type=Path, default=ROOT / "eval" / "ground_truth.json")
+    ap.add_argument("--save", type=Path, help="write raw model predictions to this JSON file")
     args = ap.parse_args()
 
-    rows = json.loads(args.truth.read_text())
+    rows = json.loads(args.truth.read_text(encoding="utf-8-sig"))
     client = get_client()
-    totals = defaultdict(lambda: [0, 0, 0])  # tp, fp, fn per group
+    totals = {"strict": defaultdict(lambda: [0, 0, 0]), "lenient": defaultdict(lambda: [0, 0, 0])}
+    saved = []
 
     for row in rows:
         jpeg = preprocess_image((ROOT / row["photo"]).read_bytes(), settings.max_image_edge)
-        pred = {normalize(i.name) for i in client.detect(jpeg)[0]}
-        truth = {normalize(n) for n in row["items"]}
-        tp, fp, fn = len(pred & truth), len(pred - truth), len(truth - pred)
-        for group in ("ALL", row.get("cuisine", "unspecified")):
-            t = totals[group]
-            t[0] += tp; t[1] += fp; t[2] += fn
-        print(f"{row['photo']}: tp={tp} fp={fp} fn={fn}  missed={sorted(truth - pred)}")
+        detected = client.detect(jpeg)[0]
+        pred = sorted({normalize(i.name) for i in detected})
+        truth = sorted({normalize(n) for n in row["items"]})
+        saved.append({"photo": row["photo"], "predicted": [i.name for i in detected], "truth": row["items"]})
 
-    print("\ngroup            precision  recall   F1")
-    for group, (tp, fp, fn) in sorted(totals.items()):
-        p, r, f = prf(tp, fp, fn)
-        print(f"{group:<16} {p:9.2f} {r:7.2f} {f:6.2f}")
+        for mode in ("strict", "lenient"):
+            tp, extra, missed = match(pred, truth, lenient=(mode == "lenient"))
+            groups = ["ALL", f"cuisine:{row.get('cuisine', '?')}", f"source:{row.get('source', '?')}"]
+            for g in groups:
+                t = totals[mode][g]
+                t[0] += tp; t[1] += len(extra); t[2] += len(missed)
+            if mode == "lenient":
+                print(f"\n{row['photo']}: tp={tp} fp={len(extra)} fn={len(missed)}")
+                print(f"   missed (in labels, not detected): {missed}")
+                print(f"   extra  (detected, not in labels): {extra}")
+
+    for mode in ("strict", "lenient"):
+        print(f"\n[{mode}] group              precision  recall    F1")
+        for g, (tp, fp, fn) in sorted(totals[mode].items()):
+            p, r, f = prf(tp, fp, fn)
+            print(f"  {g:<24} {p:9.2f} {r:7.2f} {f:6.2f}")
+
+    if args.save:
+        args.save.write_text(json.dumps(saved, indent=2), encoding="utf-8")
+        print(f"\nraw predictions saved to {args.save}")
 
 
 if __name__ == "__main__":
