@@ -1,0 +1,4 @@
+[
+  {"photo": "data/photos/fridge_001.jpg", "cuisine": "american", "items": ["eggs", "milk", "cheddar cheese", "bell pepper"]},
+  {"photo": "data/photos/fridge_002.jpg", "cuisine": "east_asian", "items": ["kimchi", "tofu", "leftover white rice", "green onion"]}
+]
