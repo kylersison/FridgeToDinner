@@ -1,0 +1,12 @@
+[
+  {"photo": "data/photos/fridge_001.jpg", "cuisine": "mixed", "source": "stock", "items": ["milk", "ketchup", "mustard", "mayo", "soy sauce", "alcohol", "barbecue sauce", "hot sauce", "eggs"]},
+  {"photo": "data/photos/fridge_002.jpg", "cuisine": "mixed", "source": "stock", "items": ["yogurt", "butter", "bagels", "eggs", "lemon juice"]},
+  {"photo": "data/photos/fridge_003.jpg", "cuisine": "mixed", "source": "stock", "items": ["frozen berries", "frozen meals"]},
+  {"photo": "data/photos/fridge_004.jpg", "cuisine": "mixed", "source": "stock", "items": ["juice", "milk", "oil"]},
+  {"photo": "data/photos/fridge_005.jpg", "cuisine": "japanese", "source": "stock", "items": ["beer", "wine", "sake"]},
+  {"photo": "data/photos/fridge_006.jpg", "cuisine": "mixed", "source": "stock", "items": ["watermelon", "bananas", "eggs"]},
+  {"photo": "data/photos/fridge_007.jpg", "cuisine": "mixed", "source": "stock", "items": ["bottles", "carrots", "oranges", "tomatos", "grapes", "eggs", "lemons"]},
+  {"photo": "data/photos/fridge_008.JPG", "cuisine": "mixed", "source": "stock", "items": ["beer", "soda", "wine"]},
+  {"photo": "data/photos/fridge_009.jpg", "cuisine": "mixed", "source": "stock", "items": ["milk"]},
+  {"photo": "data/photos/fridge_010.jpg", "cuisine": "mixed", "source": "stock", "items": ["tomato", "broccoli", "carrots", "eggplant", "zucchini"]}
+]
