@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FridgeToDinner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css?v=3" />
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+
+  <nav class="topbar">
+    <a class="brand" href="#top"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2.5"/><path d="M5 9.5h14M8.5 5.5v2M8.5 12.5v4"/></svg> FridgeToDinner</a>
+    <div class="nav-links">
+      <a href="#step-appliances">Appliances</a>
+      <a href="#step-photo">Photo</a>
+      <a href="#step-priorities">Priorities</a>
+      <a href="#step-meals">Meals</a>
+    </div>
+    <span id="mode-badge" class="badge" hidden></span>
+  </nav>
+
+  <header class="hero" id="top">
+    <h1>Dinner from whatever's<br />in your mini fridge</h1>
+    <p class="sub">Snap a photo, fix what the AI missed, and get three meals you can actually make with a microwave and what you already have.</p>
+    <div class="cta">
+      <a class="btn primary" href="#step-photo">Scan my fridge</a>
+      <a class="btn light" href="#step-appliances">Set appliances</a>
+    </div>
+  </header>
+
+  <nav class="steps-nav" aria-label="Steps">
+    <a href="#step-appliances" data-step="step-appliances"><span>01</span> Appliances</a>
+    <a href="#step-photo" data-step="step-photo"><span>02</span> Photo</a>
+    <a href="#step-review" data-step="step-review"><span>03</span> Ingredients</a>
+    <a href="#step-priorities" data-step="step-priorities"><span>04</span> Priorities</a>
+    <a href="#step-meals" data-step="step-meals"><span>05</span> Meals</a>
+  </nav>
+
+  <main>
+    <section id="step-appliances" class="panel">
+      <div class="panel-head"><span class="num">01</span><h2>Your appliances</h2></div>
+      <p class="hint">Saved in this browser, so you only do this once.</p>
+      <div id="appliance-list" class="chips"></div>
+    </section>
+
+    <section id="step-photo" class="panel">
+      <div class="panel-head"><span class="num">02</span><h2>Photo of your fridge</h2></div>
+      <p class="hint">Photos are resized, stripped of location data, and never stored. Keep faces and name labels out of frame.</p>
+      <label class="drop">
+        <input id="photo-input" type="file" accept="image/*" capture="environment" />
+        <span>Choose or take a photo</span>
+      </label>
+      <img id="photo-preview" alt="Your fridge photo" hidden />
+      <button id="detect-btn" class="btn primary" disabled>Find ingredients</button>
+      <p id="detect-status" class="status"></p>
+    </section>
+
+    <section id="step-review" class="panel" hidden>
+      <div class="panel-head"><span class="num">03</span><h2>Check the list</h2></div>
+      <p class="hint">Remove anything wrong, add what was missed, and mark items that are about to go bad.</p>
+      <ul id="ingredient-list" class="ingredients"></ul>
+      <form id="add-form" class="row">
+        <input id="add-input" placeholder="Add an item, e.g. hot dogs" aria-label="Add an item" />
+        <button type="submit" class="btn light">Add</button>
+      </form>
+    </section>
+
+    <section id="step-priorities" class="panel" hidden>
+      <div class="panel-head"><span class="num">04</span><h2>What matters right now?</h2></div>
+      <p class="hint">Top is most important. Use the arrows to reorder.</p>
+      <ol id="priority-list" class="priorities"></ol>
+      <div class="fields">
+        <label>Max prep time
+          <select id="max-time">
+            <option value="10">10 min</option>
+            <option value="15">15 min</option>
+            <option value="20" selected>20 min</option>
+            <option value="30">30 min</option>
+          </select>
+        </label>
+        <label>Allergies (optional)
+          <input id="allergies" placeholder="e.g. peanuts, shellfish" />
+        </label>
+      </div>
+      <button id="generate-btn" class="btn primary">Get 3 meals</button>
+      <p id="generate-status" class="status"></p>
+    </section>
+
+    <section id="step-meals" class="panel wide" hidden>
+      <div class="panel-head"><span class="num">05</span><h2>Your meals</h2></div>
+      <div id="meal-list" class="meals"></div>
+      <button id="regen-btn" class="btn light">Regenerate</button>
+      <details id="debug" class="code">
+        <summary>Validator &amp; cost details</summary>
+        <pre id="debug-out"></pre>
+      </details>
+      <p class="disclaimer">Suggestions only. Check that food is in date, and cook raw eggs and meat until fully done.</p>
+    </section>
+  </main>
+
+  <footer>CECS 451 · Group 9</footer>
+  <script src="/static/app.js?v=3"></script>
+</body>
+</html>
