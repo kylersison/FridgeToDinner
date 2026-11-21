@@ -61,7 +61,8 @@ On our first live run it found 21 of the 41 labeled items (recall 0.51, precisio
 ## Where things are
 
 - `backend/app/main.py` is the server and the two API routes, `/api/detect` and `/api/generate`
-- `backend/app/llm.py` calls the model and runs the validate-and-retry loop
+- `backend/app/llm.py` calls the model (plus the mock version used when there's no API key)
+- `backend/app/pipeline.py` runs the validate-and-retry loop
 - `backend/app/prompts.py` has the prompts and the JSON format we make the model answer in
 - `backend/app/validator.py` has the meal rules
 - `backend/app/image_utils.py` shrinks photos and strips location data before they get sent anywhere
@@ -69,7 +70,7 @@ On our first live run it found 21 of the 41 labeled items (recall 0.51, precisio
 - `frontend/` is the website (plain HTML/CSS/JS)
 - `scripts/` has the sample runner and the eval script
 - `tests/` has the tests
-- `docs/` has more detail on the architecture and the prompts
+- `docs/architecture.md` has the architecture diagram, the API reference, and all the settings; `docs/prompts.md` has the exact prompts and the JSON format sent to the model
 
 Settings like the model name and image size live in `.env`. See `.env.example` for all of them.
 
